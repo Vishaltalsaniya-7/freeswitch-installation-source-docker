@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  freeswitch:
+    build:
+      context: .
+      dockerfile: DockerFile
+    container_name: freeswitch
+    # image: freeswitch:1.10.11-debian11
+    
+    stdin_open: true
+    tty: true
+    
+    network_mode: host
+    
+    environment:
+      LOG_LEVEL: info
+    
+    restart: unless-stopped
+    
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
+        max-file: 10
