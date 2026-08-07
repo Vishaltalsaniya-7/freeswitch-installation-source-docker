@@ -19,30 +19,24 @@ ENV PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:/usr/lib/pkgconfig"
 #     su-exec \
 #     && rm -rf /var/lib/apt/lists/*
 
+# Add these BEFORE FreeSWITCH build:
+
 RUN apt-get update && apt-get install -y \
     build-essential cmake git wget curl pkg-config \
     libtool libtool-bin autoconf automake bash \
-    ca-certificates gnupg \
-    vim nano \
-    iptables iproute2 \
-    net-tools \
-    iputils-ping \
-    procps \
-    lsof \
-    psmisc \
-    telnet \
-    dnsutils \
-    tcpdump \
-    strace \
-    sudo \
+    ca-certificates gnupg vim nano \
+    iptables iproute2 net-tools iputils-ping procps lsof psmisc telnet dnsutils tcpdump strace sudo \
     libssl-dev libsqlite3-dev libcurl4-openssl-dev \
     libpcre3-dev libspeex-dev libspeexdsp-dev \
-    libldns-dev uuid-dev \
-    libpq-dev libopus-dev libsndfile1-dev \
+    libldns-dev uuid-dev libpq-dev libopus-dev libsndfile1-dev \
     libavformat-dev libavcodec-dev libavutil-dev \
     libswscale-dev libjpeg-dev libtiff-dev \
-    libedit-dev liblua5.3-dev \
-    yasm nasm sox libsox-dev \
+    libedit-dev liblua5.3-dev yasm nasm sox libsox-dev \
+    libsrtp2-dev \
+    librabbitmq-dev \
+    libpng-dev \
+    flite flite-dev \
+    zlib1g-dev \
     && rm -rf /var/lib/apt/lists/*
     
 # libks
@@ -107,7 +101,7 @@ RUN ./bootstrap.sh -j $(nproc) && \
     ./configure \
         --prefix=/usr/local/freeswitch \
         --with-openssl && \
-    make -j$(nproc) && \
+    make -j1 && \
     make install && \
     ln -s /usr/local/freeswitch/etc/freeswitch /usr/local/freeswitch/conf && \
     sed -i 's|default_password=1234|default_password=vspl@123|g' \
