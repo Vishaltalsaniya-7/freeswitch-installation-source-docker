@@ -1,44 +1,99 @@
-FROM debian:12-slim
+# FROM debian:12-slim
+
+# ENV DEBIAN_FRONTEND=noninteractive
+# ENV PATH="/usr/local/freeswitch/bin:$PATH"
+# ENV PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:/usr/lib/pkgconfig"
+
+FROM ubuntu:24.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV PATH="/usr/local/freeswitch/bin:$PATH"
 ENV PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:/usr/lib/pkgconfig"
 
-# RUN apt-get update && apt-get install -y \
-#     build-essential cmake git wget curl pkg-config \
-#     libtool libtool-bin autoconf automake bash \
-#     ca-certificates gnupg \
-#     libssl-dev libsqlite3-dev libcurl4-openssl-dev \
-#     libpcre2-dev libspeex-dev libspeexdsp-dev \
-#     libsofia-sip-ua-dev libldns-dev uuid-dev \
-#     libpq-dev libopus-dev libsndfile1-dev \
-#     libavformat-dev libavcodec-dev libavutil-dev \
-#     libswscale-dev libjpeg-dev libtiff-dev \
-#     libedit-dev liblua5.3-dev \
-#     yasm nasm sox libsox-dev libsox-fmt-all \
-#     su-exec \
-#     && rm -rf /var/lib/apt/lists/*
-
 # Add these BEFORE FreeSWITCH build:
-
 RUN apt-get update && apt-get install -y \
-    build-essential cmake git wget curl pkg-config \
-    libtool libtool-bin autoconf automake bash \
-    ca-certificates gnupg vim nano \
-    iptables iproute2 net-tools iputils-ping procps lsof psmisc telnet dnsutils tcpdump strace sudo \
-    libssl-dev libsqlite3-dev libcurl4-openssl-dev \
-    libpcre3-dev libspeex-dev libspeexdsp-dev \
-    libldns-dev uuid-dev libpq-dev libopus-dev libsndfile1-dev \
-    libavformat-dev libavcodec-dev libavutil-dev \
-    libswscale-dev libjpeg-dev libtiff-dev \
-    libedit-dev liblua5.3-dev yasm nasm sox libsox-dev \
+    build-essential \
+    cmake \
+    git \
+    wget \
+    curl \
+    pkg-config \
+    libtool \
+    libtool-bin \
+    autoconf \
+    automake \
+    bash \
+    ca-certificates \
+    gnupg \
+    vim \
+    nano \
+    \
+    iptables \
+    iproute2 \
+    net-tools \
+    iputils-ping \
+    procps \
+    lsof \
+    psmisc \
+    telnet \
+    dnsutils \
+    tcpdump \
+    strace \
+    sudo \
+    \
+    libssl-dev \
+    libsqlite3-dev \
+    libcurl4-openssl-dev \
+    libpcre3-dev \
+    libpcre2-dev \
+    libspeex-dev \
+    libspeexdsp-dev \
+    # libspandsp-dev \
+    libldns-dev \
+    uuid-dev \
+    libpq-dev \
+    libopus-dev \
+    libsndfile1-dev \
+    \
+    libavformat-dev \
+    libavcodec-dev \
+    libavutil-dev \
+    libavfilter-dev \
+    libavdevice-dev \
+    libpostproc-dev \
+    libswscale-dev \
+    \
+    libjpeg-dev \
+    libtiff-dev \
+    libpng-dev \
+    libvpx-dev \
+    \
+    libedit-dev \
+    liblua5.3-dev \
+    \
+    libxml2-dev \
+    libxslt1-dev \
+    \
+    libogg-dev \
+    libvorbis-dev \
+    libmpg123-dev \
+    libsamplerate0-dev \
+    \
+    yasm \
+    nasm \
+    sox \
+    libsox-dev \
+    \
     libsrtp2-dev \
     librabbitmq-dev \
-    libpng-dev \
-    flite flite-dev \
+    \
+    flite \
+    flite-dev \
+    \
     zlib1g-dev \
     && rm -rf /var/lib/apt/lists/*
     
+
 # libks
 RUN git clone https://github.com/signalwire/libks.git /usr/src/libks && \
     cd /usr/src/libks && \
@@ -58,7 +113,7 @@ RUN git clone https://github.com/signalwire/signalwire-c.git /usr/src/signalwire
     rm -rf /usr/src/signalwire-c
 
 # spandsp
-RUN git clone https://github.com/freeswitch/spandsp.git /usr/src/spandsp && \
+RUN git clone  https://github.com/freeswitch/spandsp.git /usr/src/spandsp && \
     cd /usr/src/spandsp && \
     ./bootstrap.sh && \
     ./configure && \
@@ -78,7 +133,7 @@ RUN git clone https://github.com/freeswitch/sofia-sip.git /usr/src/sofia-sip && 
     rm -rf /usr/src/sofia-sip
 
 # FreeSWITCH source
-RUN git clone --branch v1.10.11 --depth 1 \
+RUN git clone --branch v1.10.12 --depth 1 \
     https://github.com/signalwire/freeswitch.git \
     /usr/src/freeswitch
 
@@ -87,28 +142,17 @@ WORKDIR /usr/src/freeswitch
 # Copy custom modules configuration
 COPY modules.conf /usr/src/freeswitch/modules.conf
 
-# RUN ./bootstrap.sh -j && \
-#       ldconfig && \
-#     ./configure \
-#     make -j$(nproc) && \
-#     make install && \
-#     RUN ln -s /usr/local/freeswitch/etc/freeswitch /usr/local/freeswitch/conf
-#     make sounds-install && \
-#     make moh-install && \
-#     rm -rf /usr/src/freeswitch
-RUN ./bootstrap.sh -j $(nproc) && \
-    ldconfig && \
+RUN ./bootstrap.sh -j "$(nproc)" && \
     ./configure \
         --prefix=/usr/local/freeswitch \
-        --with-openssl && \
+        --with-openssl \
+        --with-pgsql && \
     make -j1 && \
     make install && \
-    ln -s /usr/local/freeswitch/etc/freeswitch /usr/local/freeswitch/conf && \
-    sed -i 's|default_password=1234|default_password=vspl@123|g' \
-        /usr/local/freeswitch/conf/vars.xml && \
     make sounds-install && \
     make moh-install && \
     rm -rf /usr/src/freeswitch
+
 # Create freeswitch user and directories
 RUN useradd -r -s /bin/false freeswitch && \
     mkdir -p /usr/local/freeswitch/run \
