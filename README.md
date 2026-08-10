@@ -1,7 +1,7 @@
 # freeswitch-installation-source-docker
-# FreeSWITCH 1.10.11 Source Build with Docker (Debian 11)
+# FreeSWITCH 1.10.12 Source Build with Docker 
 
-Build and run **FreeSWITCH v1.10.11** from source inside a **Debian 11 Slim** Docker container.
+Build and run **FreeSWITCH v1.10.12** from source inside a **ubuntu 24** Docker container.
 
 This project compiles FreeSWITCH from source along with all required libraries including:
 
@@ -9,7 +9,7 @@ This project compiles FreeSWITCH from source along with all required libraries i
 - signalwire-c
 - SpanDSP
 - Sofia-SIP
-- FreeSWITCH 1.10.11
+- FreeSWITCH 1.10.12
 
 The container is intended for development, testing, and production deployments where FreeSWITCH is built directly from source.
 
@@ -17,8 +17,8 @@ The container is intended for development, testing, and production deployments w
 
 # Features
 
-- Debian 11 Slim base image
-- FreeSWITCH 1.10.11
+-ubuntu 24 image
+- FreeSWITCH 1.10.13
 - Builds everything from source
 - Uses Docker Compose
 - Host networking support
@@ -142,7 +142,7 @@ docker compose build
 or
 
 ```bash
-docker build -t freeswitch:1.10.11 .
+docker build -t freeswitch:1.10.12 .
 ```
 
 ---
@@ -366,7 +366,7 @@ fs_cli -x "sofia status"
 # Notes
 
 - Built from official FreeSWITCH source.
-- Uses Debian 11 Slim.
+- Uses ubuntu 24
 - Intended for development and production environments.
 - Host networking is recommended for SIP deployments.
 - Easily extendable with additional FreeSWITCH modules.
