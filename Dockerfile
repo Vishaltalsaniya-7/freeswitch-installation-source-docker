@@ -141,17 +141,27 @@ WORKDIR /usr/src/freeswitch
 
 # Copy custom modules configuration
 COPY modules.conf /usr/src/freeswitch/modules.conf
-
 RUN ./bootstrap.sh -j "$(nproc)" && \
     ./configure \
         --prefix=/usr/local/freeswitch \
+        --sysconfdir=/usr/local/freeswitch \
         --with-openssl \
         --with-pgsql && \
     make -j1 && \
     make install && \
     make sounds-install && \
     make moh-install && \
-    rm -rf /usr/src/freeswitch
+#     rm -rf /usr/src/freeswitch
+# RUN ./bootstrap.sh -j "$(nproc)" && \
+#     ./configure \
+#         --prefix=/usr/local/freeswitch \
+#         --with-openssl \
+#         --with-pgsql && \
+#     make -j1 && \
+#     make install && \
+#     make sounds-install && \
+#     make moh-install && \
+#     rm -rf /usr/src/freeswitch
 
 # Create freeswitch user and directories
 RUN useradd -r -s /bin/false freeswitch && \
