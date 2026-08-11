@@ -1,15 +1,6 @@
-# FROM debian:12-slim
-
-# ENV DEBIAN_FRONTEND=noninteractive
-# ENV PATH="/usr/local/freeswitch/bin:$PATH"
-# ENV PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:/usr/lib/pkgconfig"
-
 FROM ubuntu:24.04
-
 ENV DEBIAN_FRONTEND=noninteractive
-ENV PATH="/usr/local/freeswitch/bin:$PATH"
 ENV PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:/usr/lib/pkgconfig"
-
 # Add these BEFORE FreeSWITCH build:
 RUN apt-get update && apt-get install -y \
     build-essential \
@@ -93,7 +84,6 @@ RUN apt-get update && apt-get install -y \
     zlib1g-dev \
     && rm -rf /var/lib/apt/lists/*
     
-
 # libks
 RUN git clone https://github.com/signalwire/libks.git /usr/src/libks && \
     cd /usr/src/libks && \
@@ -102,7 +92,6 @@ RUN git clone https://github.com/signalwire/libks.git /usr/src/libks && \
     make install && \
     ldconfig && \
     rm -rf /usr/src/libks
-
 # signalwire-c
 RUN git clone https://github.com/signalwire/signalwire-c.git /usr/src/signalwire-c && \
     cd /usr/src/signalwire-c && \
@@ -111,7 +100,6 @@ RUN git clone https://github.com/signalwire/signalwire-c.git /usr/src/signalwire
     make install && \
     ldconfig && \
     rm -rf /usr/src/signalwire-c
-
 # spandsp
 RUN git clone  https://github.com/freeswitch/spandsp.git /usr/src/spandsp && \
     cd /usr/src/spandsp && \
@@ -121,7 +109,6 @@ RUN git clone  https://github.com/freeswitch/spandsp.git /usr/src/spandsp && \
     make install && \
     ldconfig && \
     rm -rf /usr/src/spandsp
-
 # sofia sip
 RUN git clone https://github.com/freeswitch/sofia-sip.git /usr/src/sofia-sip && \
     cd /usr/src/sofia-sip && \
@@ -131,49 +118,31 @@ RUN git clone https://github.com/freeswitch/sofia-sip.git /usr/src/sofia-sip && 
     make install && \
     ldconfig && \
     rm -rf /usr/src/sofia-sip
-
 # FreeSWITCH source
 RUN git clone --branch v1.10.12 --depth 1 \
     https://github.com/signalwire/freeswitch.git \
     /usr/src/freeswitch
-
 WORKDIR /usr/src/freeswitch
-
 # Copy custom modules configuration
 COPY modules.conf /usr/src/freeswitch/modules.conf
 RUN ./bootstrap.sh -j "$(nproc)" && \
     ./configure \
-        --prefix=/usr/local/freeswitch \
-        --sysconfdir=/usr/local/freeswitch \
         --with-openssl \
         --with-pgsql && \
     make -j1 && \
     make install && \
     make sounds-install && \
     make moh-install && \
-#     rm -rf /usr/src/freeswitch
-# RUN ./bootstrap.sh -j "$(nproc)" && \
-#     ./configure \
-#         --prefix=/usr/local/freeswitch \
-#         --with-openssl \
-#         --with-pgsql && \
-#     make -j1 && \
-#     make install && \
-#     make sounds-install && \
-#     make moh-install && \
-#     rm -rf /usr/src/freeswitch
-
+    rm -rf /usr/src/freeswitch
 # Create freeswitch user and directories
 RUN useradd -r -s /bin/false freeswitch && \
     mkdir -p /usr/local/freeswitch/run \
              /usr/local/freeswitch/log \
              /var/log/freeswitch && \
     chown -R freeswitch:freeswitch /usr/local/freeswitch /var/log/freeswitch
-
 # Copy entrypoint script
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
-
 # Expose ports
 EXPOSE \
 5060/udp \
@@ -181,6 +150,5 @@ EXPOSE \
 5061/tcp \
 8021/tcp \
 16384-32768/udp
-
 ENTRYPOINT ["/entrypoint.sh"]
 # CMD ["-nonat", "-ncwait"]
