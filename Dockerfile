@@ -1,5 +1,6 @@
 FROM ubuntu:24.04
 ENV DEBIAN_FRONTEND=noninteractive
+ENV PATH="/usr/local/freeswitch/bin:${PATH}"
 ENV PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:/usr/lib/pkgconfig"
 # Add these BEFORE FreeSWITCH build:
 RUN apt-get update && apt-get install -y \
@@ -133,7 +134,11 @@ RUN ./bootstrap.sh -j "$(nproc)" && \
     make install && \
     make sounds-install && \
     make moh-install && \
+    test -x /usr/local/freeswitch/bin/freeswitch && \
+    test -x /usr/local/freeswitch/bin/fs_cli && \
+    /usr/local/freeswitch/bin/freeswitch -version && \
     rm -rf /usr/src/freeswitch
+    
 # Create freeswitch user and directories
 RUN useradd -r -s /bin/false freeswitch && \
     mkdir -p /usr/local/freeswitch/run \
@@ -143,6 +148,7 @@ RUN useradd -r -s /bin/false freeswitch && \
 # Copy entrypoint script
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
+WORKDIR /usr/local/freeswitch
 # Expose ports
 EXPOSE \
 5060/udp \
